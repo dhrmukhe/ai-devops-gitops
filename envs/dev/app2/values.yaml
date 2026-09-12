@@ -1,0 +1,11 @@
+replicaCount: 2
+
+image:
+  repository: httpd
+  tag: "2.4"
+
+service:
+  type: ClusterIP
+  port: 80
+
+nameOverride: app2

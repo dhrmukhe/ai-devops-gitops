@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/YOUR-ORG/YOUR-GITOPS-REPO.git
+        revision: main
+        directories:
+          - path: envs/*/*
+
+  template:
+    metadata:
+      name: '{{path[1]}}-{{path.basename}}'
+    spec:
+      project: default
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{path[1]}}'
+
+      sources:
+        - repoURL: https://github.com/YOUR-ORG/YOUR-GITOPS-REPO.git
+          targetRevision: main
+          path: charts/{{path.basename}}
+          helm:
+            valueFiles:
+              - $values/envs/{{path[1]}}/{{path.basename}}/values.yaml
+
+        - repoURL: https://github.com/YOUR-ORG/YOUR-GITOPS-REPO.git
+          targetRevision: main
+          ref: values
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
